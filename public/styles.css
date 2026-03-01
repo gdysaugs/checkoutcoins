@@ -69,6 +69,20 @@ body {
   margin: 0 0 14px;
 }
 
+.oauth-row {
+  margin-bottom: 12px;
+}
+
+.oauth-btn {
+  width: 100%;
+  background: #ffffff;
+  color: #10243c;
+  border: 1px solid #b5cce8;
+}
+
+.oauth-btn:hover {
+  background: #f2f7ff;
+}
 .auth-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -395,3 +409,4 @@ button:disabled {
     height: 20px;
   }
 }
+

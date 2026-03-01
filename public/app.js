@@ -44,6 +44,7 @@ function cacheDom() {
   ui.authSection = document.getElementById("authSection");
   ui.appSection = document.getElementById("appSection");
   ui.loginForm = document.getElementById("loginForm");
+  ui.googleLoginBtn = document.getElementById("googleLoginBtn");
   ui.registerForm = document.getElementById("registerForm");
   ui.loginEmail = document.getElementById("loginEmail");
   ui.loginPassword = document.getElementById("loginPassword");
@@ -63,6 +64,9 @@ function cacheDom() {
 
 function bindEvents() {
   ui.loginForm.addEventListener("submit", onLogin);
+  if (ui.googleLoginBtn) {
+    ui.googleLoginBtn.addEventListener("click", onGoogleLogin);
+  }
   ui.registerForm.addEventListener("submit", onRegister);
   ui.refreshPointsBtn.addEventListener("click", refreshPoints);
   ui.logoutBtn.addEventListener("click", onLogout);
@@ -99,6 +103,26 @@ async function onLogin(event) {
     showFlash(error.message || "Login failed", true);
   } finally {
     setFormBusy(ui.loginForm, false);
+  }
+}
+
+async function onGoogleLogin() {
+  clearFlash();
+  if (!ui.googleLoginBtn) return;
+
+  ui.googleLoginBtn.disabled = true;
+
+  try {
+    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo }
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    showFlash(error.message || "Google login failed", true);
+    ui.googleLoginBtn.disabled = false;
   }
 }
 
@@ -790,3 +814,6 @@ function startMemory(container) {
     // no-op
   };
 }
+
+
+
