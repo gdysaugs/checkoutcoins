@@ -1,5 +1,6 @@
 const SUPABASE_URL = "https://tofpgoewiaczhnanharo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvZnBnb2V3aWFjemhuYW5oYXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTM3NDksImV4cCI6MjA4NzA2OTc0OX0.Jwy75KytdZGMrv7uKYYfR1HzIVnTSTQBTKTkRKv9dd4";
+const OAUTH_REDIRECT_URL = "https://checkoutcoins.uk";
 
 const GAME_META = {
   othello: { title: "Othello", cost: 1 },
@@ -118,7 +119,7 @@ async function onGoogleLogin() {
   ui.googleLoginBtn.disabled = true;
 
   try {
-    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const redirectTo = OAUTH_REDIRECT_URL;
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo }
@@ -819,6 +820,7 @@ function startMemory(container) {
     // no-op
   };
 }
+
 
 
 
