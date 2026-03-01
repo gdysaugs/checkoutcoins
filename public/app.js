@@ -63,11 +63,16 @@ function cacheDom() {
 }
 
 function bindEvents() {
-  ui.loginForm.addEventListener("submit", onLogin);
+  if (ui.loginForm) {
+    ui.loginForm.addEventListener("submit", onLogin);
+  }
   if (ui.googleLoginBtn) {
     ui.googleLoginBtn.addEventListener("click", onGoogleLogin);
   }
-  ui.registerForm.addEventListener("submit", onRegister);
+  if (ui.registerForm) {
+    ui.registerForm.addEventListener("submit", onRegister);
+  }
+
   ui.refreshPointsBtn.addEventListener("click", refreshPoints);
   ui.logoutBtn.addEventListener("click", onLogout);
   ui.closeModalBtn.addEventListener("click", closeModal);
@@ -814,6 +819,8 @@ function startMemory(container) {
     // no-op
   };
 }
+
+
 
 
 
