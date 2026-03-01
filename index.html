@@ -3,127 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Image Editing Service</title>
-    <style>
-      :root {
-        color-scheme: light;
-        --bg: #f6f8fc;
-        --card: #ffffff;
-        --line: #dbe2ef;
-        --ink: #141a2c;
-        --sub: #4d5b7c;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        font-family: "Segoe UI", Arial, sans-serif;
-        background: linear-gradient(180deg, #f9fbff 0%, var(--bg) 60%, #eef3ff 100%);
-        color: var(--ink);
-      }
-
-      main {
-        max-width: 1040px;
-        margin: 0 auto;
-        padding: 24px 16px 48px;
-      }
-
-      .hero {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 16px;
-        box-shadow: 0 10px 30px rgba(43, 109, 248, 0.08);
-      }
-
-      .banner {
-        margin: 0;
-        overflow: hidden;
-        border-radius: 14px;
-        border: 1px solid #ced9f3;
-      }
-
-      .banner img {
-        display: block;
-        width: 100%;
-        height: clamp(220px, 42vw, 430px);
-        object-fit: cover;
-      }
-
-      .hero-copy {
-        padding: 18px 6px 4px;
-      }
-
-      h1 {
-        margin: 0 0 10px;
-        font-size: clamp(1.45rem, 3vw, 2.1rem);
-        line-height: 1.25;
-      }
-
-      p {
-        margin: 0;
-        color: var(--sub);
-        line-height: 1.7;
-      }
-
-      .grid {
-        margin-top: 16px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 14px;
-      }
-
-      .card h2 {
-        margin: 0 0 8px;
-        font-size: 1rem;
-      }
-
-      @media (max-width: 840px) {
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
+    <title>Arcade Points Hub</title>
+    <meta name="description" content="Play simple browser games using points." />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/app.js" defer></script>
   </head>
   <body>
-    <main>
+    <main class="page">
       <section class="hero">
-        <figure class="banner">
-          <img src="/assets/hero-banner.avif" alt="Image editing preview banner" />
-        </figure>
+        <img class="hero-banner" src="/assets/game-banner.png" alt="Game hub banner" />
         <div class="hero-copy">
-          <h1>AI Image Editing Service</h1>
+          <h1>Play Games With Points</h1>
           <p>
-            This service edits uploaded images with AI instructions. Users can upload
-            a photo, apply prompt-based edits, preview results, and export the final image.
+            A simple game portal where you can spend points to play mini games.
+            Sign in, check your point balance, then launch Othello, Invader, and Memory Match.
           </p>
         </div>
       </section>
 
-      <section class="grid" aria-label="How it works">
-        <article class="card">
-          <h2>1. Upload</h2>
-          <p>Upload one image (JPG, PNG, WEBP, AVIF) and choose an edit style.</p>
-        </article>
-        <article class="card">
-          <h2>2. Edit with Prompt</h2>
-          <p>Describe the change you want, such as lighting, outfit, background, or mood.</p>
-        </article>
-        <article class="card">
-          <h2>3. Preview and Export</h2>
-          <p>Generate a preview, compare versions, and download the final edited image.</p>
-        </article>
+      <section id="authSection" class="panel auth-panel">
+        <h2>Login / Register</h2>
+        <div class="auth-grid">
+          <form id="loginForm" class="card">
+            <h3>Login</h3>
+            <label>Email</label>
+            <input id="loginEmail" type="email" required />
+            <label>Password</label>
+            <input id="loginPassword" type="password" minlength="6" required />
+            <button type="submit">Login</button>
+          </form>
+
+          <form id="registerForm" class="card">
+            <h3>Register</h3>
+            <label>Email</label>
+            <input id="registerEmail" type="email" required />
+            <label>Password</label>
+            <input id="registerPassword" type="password" minlength="6" required />
+            <button type="submit">Create Account</button>
+          </form>
+        </div>
       </section>
+
+      <section id="appSection" class="panel app-panel hidden">
+        <div class="user-bar">
+          <div>
+            <p class="muted">Signed in as</p>
+            <strong id="userEmail">-</strong>
+          </div>
+          <div class="wallet">
+            <span>Points</span>
+            <strong id="pointCount">0</strong>
+          </div>
+          <div class="user-actions">
+            <button id="refreshPointsBtn" class="ghost-btn" type="button">Refresh Points</button>
+            <button id="logoutBtn" class="ghost-btn" type="button">Logout</button>
+          </div>
+        </div>
+
+        <h2>Game Lobby</h2>
+        <div class="game-grid">
+          <article class="game-card">
+            <h3>Othello</h3>
+            <p>Classic board game. Place disks and flip your opponent pieces.</p>
+            <p class="cost">Cost: 1 point</p>
+            <button class="play-btn" data-game="othello" data-cost="1" type="button">Play Othello</button>
+          </article>
+
+          <article class="game-card">
+            <h3>Invader Rush</h3>
+            <p>Arcade shooter. Move, shoot, and clear incoming enemy rows.</p>
+            <p class="cost">Cost: 2 points</p>
+            <button class="play-btn" data-game="invader" data-cost="2" type="button">Play Invader Rush</button>
+          </article>
+
+          <article class="game-card">
+            <h3>Memory Match</h3>
+            <p>Flip cards and find all matching pairs in as few turns as possible.</p>
+            <p class="cost">Cost: 1 point</p>
+            <button class="play-btn" data-game="memory" data-cost="1" type="button">Play Memory Match</button>
+          </article>
+        </div>
+      </section>
+
+      <p id="flash" class="flash hidden"></p>
     </main>
+
+    <section id="gameModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Game</h3>
+          <button id="closeModalBtn" type="button" class="close-btn">Close</button>
+        </div>
+        <div id="modalBody" class="modal-body"></div>
+      </div>
+    </section>
   </body>
 </html>
