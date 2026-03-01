@@ -1,12 +1,175 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>checkoutcoins</title>
+    <title>AI Image Editing Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fc;
+        --card: #ffffff;
+        --line: #dbe2ef;
+        --ink: #141a2c;
+        --sub: #4d5b7c;
+        --brand: #2b6df8;
+        --brand-2: #22c1c3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(180deg, #f9fbff 0%, var(--bg) 60%, #eef3ff 100%);
+        color: var(--ink);
+      }
+
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+
+      .hero {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(43, 109, 248, 0.08);
+      }
+
+      .banner {
+        margin: 0;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid #ced9f3;
+      }
+
+      .banner img {
+        display: block;
+        width: 100%;
+        height: clamp(220px, 42vw, 430px);
+        object-fit: cover;
+      }
+
+      .hero-copy {
+        padding: 18px 6px 4px;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(1.45rem, 3vw, 2.1rem);
+        line-height: 1.25;
+      }
+
+      p {
+        margin: 0;
+        color: var(--sub);
+        line-height: 1.7;
+      }
+
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        display: inline-block;
+        text-decoration: none;
+        border-radius: 10px;
+        padding: 11px 16px;
+        font-weight: 600;
+      }
+
+      .btn-primary {
+        color: #fff;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      }
+
+      .btn-ghost {
+        color: #24418a;
+        border: 1px solid #aec3f9;
+        background: #edf3ff;
+      }
+
+      .grid {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .note {
+        margin-top: 14px;
+        background: #f2f7ff;
+        border: 1px solid #c9dbff;
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: #2f4b86;
+        font-size: 0.93rem;
+      }
+
+      @media (max-width: 840px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
   <body>
-    <h1>checkoutcoins</h1>
-    <p>Cloudflare Pages bootstrap is ready.</p>
+    <main>
+      <section class="hero">
+        <figure class="banner">
+          <img src="/assets/hero-banner.avif" alt="Image editing preview banner" />
+        </figure>
+        <div class="hero-copy">
+          <h1>AI Image Editing Service (Prototype)</h1>
+          <p>
+            This service edits uploaded images with AI instructions. Users can upload
+            a photo, apply prompt-based edits, preview results, and export the final image.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="#" aria-label="Start editing">Start Editing</a>
+            <a class="btn btn-ghost" href="#" aria-label="View pricing">View Pricing</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid" aria-label="How it works">
+        <article class="card">
+          <h2>1. Upload</h2>
+          <p>Upload one image (JPG, PNG, WEBP, AVIF) and choose an edit style.</p>
+        </article>
+        <article class="card">
+          <h2>2. Edit with Prompt</h2>
+          <p>Describe the change you want, such as lighting, outfit, background, or mood.</p>
+        </article>
+        <article class="card">
+          <h2>3. Preview and Export</h2>
+          <p>Generate a preview, compare versions, and download the final edited image.</p>
+        </article>
+      </section>
+
+      <section class="note" aria-label="Prototype notice">
+        Prototype page for payment onboarding review. Checkout and API endpoints will be connected in the next step.
+      </section>
+    </main>
   </body>
 </html>
