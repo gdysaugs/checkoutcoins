@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Image Editing Prototype</title>
+    <title>AI Image Editing Service</title>
     <style>
       :root {
         color-scheme: light;
@@ -12,8 +12,6 @@
         --line: #dbe2ef;
         --ink: #141a2c;
         --sub: #4d5b7c;
-        --brand: #2b6df8;
-        --brand-2: #22c1c3;
       }
 
       * {
@@ -71,32 +69,6 @@
         line-height: 1.7;
       }
 
-      .actions {
-        margin-top: 18px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .btn {
-        display: inline-block;
-        text-decoration: none;
-        border-radius: 10px;
-        padding: 11px 16px;
-        font-weight: 600;
-      }
-
-      .btn-primary {
-        color: #fff;
-        background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      }
-
-      .btn-ghost {
-        color: #24418a;
-        border: 1px solid #aec3f9;
-        background: #edf3ff;
-      }
-
       .grid {
         margin-top: 16px;
         display: grid;
@@ -116,16 +88,6 @@
         font-size: 1rem;
       }
 
-      .note {
-        margin-top: 14px;
-        background: #f2f7ff;
-        border: 1px solid #c9dbff;
-        border-radius: 12px;
-        padding: 12px 14px;
-        color: #2f4b86;
-        font-size: 0.93rem;
-      }
-
       @media (max-width: 840px) {
         .grid {
           grid-template-columns: 1fr;
@@ -140,15 +102,11 @@
           <img src="/assets/hero-banner.avif" alt="Image editing preview banner" />
         </figure>
         <div class="hero-copy">
-          <h1>AI Image Editing Service (Prototype)</h1>
+          <h1>AI Image Editing Service</h1>
           <p>
             This service edits uploaded images with AI instructions. Users can upload
             a photo, apply prompt-based edits, preview results, and export the final image.
           </p>
-          <div class="actions">
-            <a class="btn btn-primary" href="#" aria-label="Start editing">Start Editing</a>
-            <a class="btn btn-ghost" href="#" aria-label="View pricing">View Pricing</a>
-          </div>
         </div>
       </section>
 
@@ -165,10 +123,6 @@
           <h2>3. Preview and Export</h2>
           <p>Generate a preview, compare versions, and download the final edited image.</p>
         </article>
-      </section>
-
-      <section class="note" aria-label="Prototype notice">
-        Prototype page for payment onboarding review. Checkout and API endpoints will be connected in the next step.
       </section>
     </main>
   </body>
