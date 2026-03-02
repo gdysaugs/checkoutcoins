@@ -14,11 +14,41 @@
       <section class="hero">
         <img class="hero-banner" src="/assets/game-banner.png" alt="Game hub banner" />
         <div class="hero-copy">
+          <div class="top-legal-links">
+            <a href="/terms.html">利用規約</a>
+          </div>
           <h1>Spark Games</h1>
           <p>
             A simple game portal where you can spend points to play mini games.
             Sign in, check your point balance, then launch Othello, Invader, and Memory Match.
           </p>
+          <p>
+            Spark Gamesは、コインを使ってミニゲームを楽しめるシンプルなポータルです。
+            Spark Gamesで購入したコインは、関連サイトでも共通で利用できます。
+          </p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>各ゲームの説明</h2>
+        <div class="game-grid">
+          <article class="game-card">
+            <h3>Othello</h3>
+            <p>定番のリバーシです。石を挟んでひっくり返し、最終的に自分の色を多く残した方が勝ちです。</p>
+            <p>先を読んだ戦略プレイが好きな方におすすめです。</p>
+          </article>
+
+          <article class="game-card">
+            <h3>Invader Rush</h3>
+            <p>横移動しながら敵を撃ち落とすシューティングゲームです。敵弾を避けつつ連続撃破で高得点を狙えます。</p>
+            <p>短時間でスリルを楽しみたい方に向いています。</p>
+          </article>
+
+          <article class="game-card">
+            <h3>Memory Match</h3>
+            <p>カードを2枚ずつめくり、同じ絵柄を揃えていく記憶ゲームです。少ない手数で全ペアを揃えると高評価になります。</p>
+            <p>直感的に遊べるので、初めてでもすぐに楽しめます。</p>
+          </article>
         </div>
       </section>
 
@@ -26,6 +56,7 @@
         <h2>Google Login</h2>
         <div class="oauth-row">
           <button id="googleLoginBtn" class="oauth-btn" type="button">Continue with Google</button>
+          <button id="emailLoginBtn" class="oauth-btn oauth-btn--email" type="button">Login with Email</button>
         </div>
         <p class="muted">Sign in with Google to access your shared point wallet.</p>
       </section>
@@ -50,21 +81,21 @@
         <div class="game-grid">
           <article class="game-card">
             <h3>Othello</h3>
-            <p>Classic board game. Place disks and flip your opponent pieces.</p>
+            <p>石を挟んでひっくり返し、最終的に自分の色を多く残す戦略ボードゲームです。</p>
             <p class="cost">Cost: 1 point</p>
             <button class="play-btn" data-game="othello" data-cost="1" type="button">Play Othello</button>
           </article>
 
           <article class="game-card">
             <h3>Invader Rush</h3>
-            <p>Arcade shooter. Move, shoot, and clear incoming enemy rows.</p>
+            <p>迫ってくる敵の列を回避しながら撃破する、反射神経重視のアーケードシューティングです。</p>
             <p class="cost">Cost: 2 points</p>
             <button class="play-btn" data-game="invader" data-cost="2" type="button">Play Invader Rush</button>
           </article>
 
           <article class="game-card">
             <h3>Memory Match</h3>
-            <p>Flip cards and find all matching pairs in as few turns as possible.</p>
+            <p>カードの位置を覚えてペアを揃える、シンプルで奥深い記憶ゲームです。</p>
             <p class="cost">Cost: 1 point</p>
             <button class="play-btn" data-game="memory" data-cost="1" type="button">Play Memory Match</button>
           </article>
@@ -83,6 +114,8 @@
         <div id="modalBody" class="modal-body"></div>
       </div>
     </section>
+
+    <a class="legal-fab" href="/tokusho.html">特定商取引法に基づく表記</a>
   </body>
 </html>
 
