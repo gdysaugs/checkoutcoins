@@ -46,6 +46,7 @@ function cacheDom() {
   ui.appSection = document.getElementById("appSection");
   ui.loginForm = document.getElementById("loginForm");
   ui.googleLoginBtn = document.getElementById("googleLoginBtn");
+  ui.emailLoginBtn = document.getElementById("emailLoginBtn");
   ui.registerForm = document.getElementById("registerForm");
   ui.loginEmail = document.getElementById("loginEmail");
   ui.loginPassword = document.getElementById("loginPassword");
@@ -69,6 +70,9 @@ function bindEvents() {
   }
   if (ui.googleLoginBtn) {
     ui.googleLoginBtn.addEventListener("click", onGoogleLogin);
+  }
+  if (ui.emailLoginBtn) {
+    ui.emailLoginBtn.addEventListener("click", onEmailLogin);
   }
   if (ui.registerForm) {
     ui.registerForm.addEventListener("submit", onRegister);
@@ -130,6 +134,10 @@ async function onGoogleLogin() {
     showFlash(error.message || "Google login failed", true);
     ui.googleLoginBtn.disabled = false;
   }
+}
+
+function onEmailLogin() {
+  window.location.assign("/email-login");
 }
 
 async function onRegister(event) {

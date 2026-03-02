@@ -6,46 +6,45 @@ import {
   onOptions,
   requireAuthedUser,
   respondError,
-  setPoints
+  spendPointsAtomic
 } from "../../_lib/points.js";
 
 export const onRequestOptions = () => onOptions();
+
+const GAME_COSTS = Object.freeze({
+  othello: 1,
+  invader: 2,
+  memory: 1
+});
 
 export async function onRequestPost(context) {
   try {
     const user = await requireAuthedUser(context.request, context.env);
     const body = await context.request.json().catch(() => ({}));
 
-    const cost = Number(body.cost);
     const game = String(body.game || "unknown").toLowerCase();
 
-    if (!Number.isInteger(cost) || cost <= 0 || cost > 20) {
-      throw new ApiError(400, "Invalid cost");
-    }
-
-    if (!/^[a-z0-9_-]{2,32}$/.test(game)) {
+    if (!Object.prototype.hasOwnProperty.call(GAME_COSTS, game)) {
       throw new ApiError(400, "Invalid game key");
     }
 
-    const wallet = await getOrCreateWallet(context.env, user);
-    const points = Number(wallet.tickets || 0);
-
-    if (points < cost) {
-      throw new ApiError(409, "INSUFFICIENT_POINTS");
+    const expectedCost = GAME_COSTS[game];
+    if (body.cost !== undefined && Number(body.cost) !== expectedCost) {
+      throw new ApiError(400, "COST_MISMATCH");
     }
 
-    const nextPoints = points - cost;
+    const wallet = await getOrCreateWallet(context.env, user);
+    const nextPoints = await spendPointsAtomic(context.env, wallet.id, expectedCost);
 
-    await setPoints(context.env, wallet.id, nextPoints);
-    await insertTicketEvent(context.env, user, -cost, `play:${game}`, {
+    await insertTicketEvent(context.env, user, -expectedCost, `play:${game}`, {
       source: "checkoutcoins",
       game,
-      cost
+      cost: expectedCost
     });
 
     return json({
       points: nextPoints,
-      spent: cost,
+      spent: expectedCost,
       game
     });
   } catch (error) {
