@@ -235,11 +235,49 @@ export async function spendPointsAtomic(env, walletId, amount) {
   throw new ApiError(409, "POINTS_UPDATE_CONFLICT");
 }
 
-export async function insertTicketEvent(env, user, delta, reason, metadata = {}) {
+/**
+ * Atomically adds points with optimistic concurrency control.
+ * Retries when a concurrent request updated the same wallet first.
+ */
+export async function addPointsAtomic(env, walletId, amount) {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new ApiError(400, "Invalid amount");
+  }
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const wallet = await fetchWalletPoints(env, walletId);
+    const current = Number(wallet.tickets || 0);
+    const next = current + amount;
+
+    const updatedRows = await supabaseRest(
+      env,
+      `/rest/v1/user_tickets?id=eq.${encodeURIComponent(walletId)}&tickets=eq.${encodeURIComponent(current)}`,
+      {
+        method: "PATCH",
+        headers: {
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify({
+          tickets: next,
+          updated_at: new Date().toISOString()
+        })
+      }
+    );
+
+    if (Array.isArray(updatedRows) && updatedRows.length) {
+      return Number(updatedRows[0].tickets ?? next);
+    }
+    // No updated rows means another request won the race; retry.
+  }
+
+  throw new ApiError(409, "POINTS_UPDATE_CONFLICT");
+}
+
+export async function insertTicketEvent(env, user, delta, reason, metadata = {}, usageId) {
   await supabaseRest(env, "/rest/v1/ticket_events", {
     method: "POST",
     body: JSON.stringify({
-      usage_id: `game:${crypto.randomUUID()}`,
+      usage_id: usageId || `game:${crypto.randomUUID()}`,
       email: user.email,
       user_id: user.id,
       delta,
