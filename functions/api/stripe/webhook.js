@@ -2,8 +2,6 @@ import {
   addPointsAtomic,
   ApiError,
   getOrCreateWallet,
-  insertTicketEvent,
-  json,
   respondError
 } from "../../_lib/points.js";
 
@@ -42,6 +40,19 @@ function serviceHeaders(env) {
     Authorization: `Bearer ${key}`,
     "Content-Type": "application/json"
   };
+}
+
+function supabaseUrl(env, path) {
+  return `${requireEnv(env, "SUPABASE_URL")}${path}`;
+}
+
+async function parseJsonSafe(text) {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 }
 
 function parseStripeSignature(signatureHeader) {
@@ -101,22 +112,6 @@ async function verifyStripeSignature(body, signatureHeader, secret) {
   return signatures.some((sig) => timingSafeEqualHex(sig, expected));
 }
 
-async function usageAlreadyProcessed(env, usageId) {
-  const url = `${requireEnv(env, "SUPABASE_URL")}/rest/v1/ticket_events?select=id&usage_id=eq.${encodeURIComponent(
-    usageId
-  )}&limit=1`;
-  const response = await fetch(url, {
-    method: "GET",
-    headers: serviceHeaders(env)
-  });
-  if (!response.ok) {
-    const text = await response.text();
-    throw new ApiError(500, `Supabase REST error: ${text || response.status}`);
-  }
-  const rows = await response.json();
-  return Array.isArray(rows) && rows.length > 0;
-}
-
 function extractCheckoutPayload(event) {
   if (!event || event.type !== "checkout.session.completed") {
     return null;
@@ -152,6 +147,94 @@ function extractCheckoutPayload(event) {
   };
 }
 
+async function reservePurchaseEvent(env, checkout) {
+  const response = await fetch(
+    supabaseUrl(env, "/rest/v1/ticket_events?on_conflict=usage_id"),
+    {
+      method: "POST",
+      headers: {
+        ...serviceHeaders(env),
+        Prefer: "resolution=ignore-duplicates,return=representation"
+      },
+      body: JSON.stringify({
+        usage_id: checkout.usageId,
+        email: checkout.email,
+        user_id: checkout.userId,
+        delta: 0,
+        reason: "stripe_purchase_pending",
+        metadata: {
+          source: "checkoutcoins",
+          session_id: checkout.sessionId || null,
+          price_id: checkout.priceId || null,
+          coins: checkout.coins,
+          status: "pending"
+        },
+        created_at: new Date().toISOString()
+      })
+    }
+  );
+
+  const text = await response.text();
+  const rows = await parseJsonSafe(text);
+
+  if (!response.ok) {
+    const message = text || String(response.status);
+    if (message.includes("duplicate key value")) {
+      return false;
+    }
+    throw new ApiError(500, `Supabase REST error: ${message}`);
+  }
+
+  return Array.isArray(rows) && rows.length > 0;
+}
+
+async function deletePendingReservation(env, usageId) {
+  const response = await fetch(
+    supabaseUrl(
+      env,
+      `/rest/v1/ticket_events?usage_id=eq.${encodeURIComponent(usageId)}&reason=eq.stripe_purchase_pending`
+    ),
+    {
+      method: "DELETE",
+      headers: serviceHeaders(env)
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new ApiError(500, `Supabase REST error: ${text || response.status}`);
+  }
+}
+
+async function completePurchaseEvent(env, checkout) {
+  const response = await fetch(
+    supabaseUrl(env, `/rest/v1/ticket_events?usage_id=eq.${encodeURIComponent(checkout.usageId)}`),
+    {
+      method: "PATCH",
+      headers: {
+        ...serviceHeaders(env),
+        Prefer: "return=representation"
+      },
+      body: JSON.stringify({
+        delta: checkout.coins,
+        reason: "stripe_purchase",
+        metadata: {
+          source: "checkoutcoins",
+          session_id: checkout.sessionId || null,
+          price_id: checkout.priceId || null,
+          coins: checkout.coins,
+          status: "completed"
+        }
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new ApiError(500, `Supabase REST error: ${text || response.status}`);
+  }
+}
+
 export const onRequestOptions = () =>
   new Response(null, {
     status: 204,
@@ -175,35 +258,33 @@ export async function onRequestPost(context) {
       return webhookJson({ received: true, ignored: true });
     }
 
-    const alreadyProcessed = await usageAlreadyProcessed(context.env, checkout.usageId);
-    if (alreadyProcessed) {
+    // Reserve the Stripe event id first so only one concurrent webhook can grant coins.
+    const reserved = await reservePurchaseEvent(context.env, checkout);
+    if (!reserved) {
       return webhookJson({ received: true, duplicate: true });
     }
 
     const user = { id: checkout.userId, email: checkout.email };
     const wallet = await getOrCreateWallet(context.env, user);
-    const nextPoints = await addPointsAtomic(context.env, wallet.id, checkout.coins);
 
+    let nextPoints;
     try {
-      await insertTicketEvent(
-        context.env,
-        user,
-        checkout.coins,
-        "stripe_purchase",
-        {
-          source: "checkoutcoins",
-          session_id: checkout.sessionId || null,
-          price_id: checkout.priceId || null,
-          coins: checkout.coins
-        },
-        checkout.usageId
-      );
+      nextPoints = await addPointsAtomic(context.env, wallet.id, checkout.coins);
     } catch (error) {
-      const message = String(error?.message || "");
-      if (!message.includes("duplicate key value")) {
-        throw error;
+      // Release reservation on failure so Stripe retries can safely retry granting.
+      try {
+        await deletePendingReservation(context.env, checkout.usageId);
+      } catch {
+        // Keep original error; reservation cleanup can be handled manually if needed.
       }
-      return webhookJson({ received: true, duplicate: true });
+      throw error;
+    }
+
+    // Best effort: points are already granted at this point.
+    try {
+      await completePurchaseEvent(context.env, checkout);
+    } catch {
+      // Do not fail webhook after successful grant to avoid retry storms.
     }
 
     return webhookJson({
