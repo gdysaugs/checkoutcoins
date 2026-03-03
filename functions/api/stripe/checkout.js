@@ -7,11 +7,11 @@ import {
 } from "../../_lib/points.js";
 
 const PLAN_CONFIG = Object.freeze([
-  { coins: 30, envKey: "STRIPE_PRICE_ID_30", label: "Starter 30" },
-  { coins: 80, envKey: "STRIPE_PRICE_ID_80", label: "Plus 80" },
-  { coins: 200, envKey: "STRIPE_PRICE_ID_200", label: "Pro 200" },
-  { coins: 500, envKey: "STRIPE_PRICE_ID_500", label: "Mega 500" },
-  { coins: 1200, envKey: "STRIPE_PRICE_ID_1200", label: "Ultra 1200" }
+  { coins: 30, envKey: "STRIPE_PRICE_ID_30", label: "780円" },
+  { coins: 80, envKey: "STRIPE_PRICE_ID_80", label: "1920円" },
+  { coins: 200, envKey: "STRIPE_PRICE_ID_200", label: "4200円" },
+  { coins: 500, envKey: "STRIPE_PRICE_ID_500", label: "9500円" },
+  { coins: 1200, envKey: "STRIPE_PRICE_ID_1200", label: "21600円" }
 ]);
 
 const DEFAULT_APP_TAG = "checkoutcoins";
