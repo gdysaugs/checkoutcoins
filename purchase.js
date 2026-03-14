@@ -3,12 +3,32 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvZnBnb2V3aWFjemhuYW5oYXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTM3NDksImV4cCI6MjA4NzA2OTc0OX0.Jwy75KytdZGMrv7uKYYfR1HzIVnTSTQBTKTkRKv9dd4";
 const OAUTH_REDIRECT_URL = "https://checkoutcoins.uk/purchase.html";
 const PLAN_ORDER = [30, 80, 200, 500, 1200];
+const SUPABASE_PROJECT_REF = new URL(SUPABASE_URL).hostname.split(".")[0];
 
 let supabaseClient = null;
 let currentSession = null;
 let availablePlans = [];
 
 const ui = {};
+
+function clearSupabaseLocalSession() {
+  const prefixes = [`sb-${SUPABASE_PROJECT_REF}-`, "supabase.auth.token"];
+  const storages = [window.localStorage, window.sessionStorage];
+
+  for (const storage of storages) {
+    const keys = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      if (!key) continue;
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
+        keys.push(key);
+      }
+    }
+    for (const key of keys) {
+      storage.removeItem(key);
+    }
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
@@ -42,7 +62,6 @@ function cacheDom() {
   ui.authSection = document.getElementById("authSection");
   ui.walletSection = document.getElementById("walletSection");
   ui.googleLoginBtn = document.getElementById("googleLoginBtn");
-  ui.emailLoginBtn = document.getElementById("emailLoginBtn");
   ui.refreshBtn = document.getElementById("refreshBtn");
   ui.logoutBtn = document.getElementById("logoutBtn");
   ui.userEmail = document.getElementById("userEmail");
@@ -53,7 +72,6 @@ function cacheDom() {
 
 function bindEvents() {
   ui.googleLoginBtn.addEventListener("click", onGoogleLogin);
-  ui.emailLoginBtn.addEventListener("click", () => window.location.assign("/email-login"));
   ui.refreshBtn.addEventListener("click", refreshPoints);
   ui.logoutBtn.addEventListener("click", onLogout);
 }
@@ -122,11 +140,9 @@ async function onGoogleLogin() {
 
 async function onLogout() {
   clearFlash();
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) {
-    showFlash(error.message || "ログアウトに失敗しました", true);
-    return;
-  }
+  clearSupabaseLocalSession();
+  currentSession = null;
+  applyAuthState();
   showFlash("ログアウトしました");
 }
 

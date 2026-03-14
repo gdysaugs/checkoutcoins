@@ -1,6 +1,7 @@
 const SUPABASE_URL = "https://tofpgoewiaczhnanharo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRvZnBnb2V3aWFjemhuYW5oYXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTM3NDksImV4cCI6MjA4NzA2OTc0OX0.Jwy75KytdZGMrv7uKYYfR1HzIVnTSTQBTKTkRKv9dd4";
 const OAUTH_REDIRECT_URL = "https://checkoutcoins.uk";
+const SUPABASE_PROJECT_REF = new URL(SUPABASE_URL).hostname.split(".")[0];
 
 const GAME_META = {
   othello: { title: "Othello", cost: 1 },
@@ -14,6 +15,25 @@ let currentPoints = 0;
 let activeCleanup = null;
 
 const ui = {};
+
+function clearSupabaseLocalSession() {
+  const prefixes = [`sb-${SUPABASE_PROJECT_REF}-`, "supabase.auth.token"];
+  const storages = [window.localStorage, window.sessionStorage];
+
+  for (const storage of storages) {
+    const keys = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      if (!key) continue;
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
+        keys.push(key);
+      }
+    }
+    for (const key of keys) {
+      storage.removeItem(key);
+    }
+  }
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   init().catch((error) => {
@@ -46,7 +66,6 @@ function cacheDom() {
   ui.appSection = document.getElementById("appSection");
   ui.loginForm = document.getElementById("loginForm");
   ui.googleLoginBtn = document.getElementById("googleLoginBtn");
-  ui.emailLoginBtn = document.getElementById("emailLoginBtn");
   ui.registerForm = document.getElementById("registerForm");
   ui.loginEmail = document.getElementById("loginEmail");
   ui.loginPassword = document.getElementById("loginPassword");
@@ -70,9 +89,6 @@ function bindEvents() {
   }
   if (ui.googleLoginBtn) {
     ui.googleLoginBtn.addEventListener("click", onGoogleLogin);
-  }
-  if (ui.emailLoginBtn) {
-    ui.emailLoginBtn.addEventListener("click", onEmailLogin);
   }
   if (ui.registerForm) {
     ui.registerForm.addEventListener("submit", onRegister);
@@ -136,9 +152,6 @@ async function onGoogleLogin() {
   }
 }
 
-function onEmailLogin() {
-  window.location.assign("/email-login");
-}
 
 async function onRegister(event) {
   event.preventDefault();
@@ -167,11 +180,9 @@ async function onRegister(event) {
 
 async function onLogout() {
   clearFlash();
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) {
-    showFlash(error.message || "Logout failed", true);
-    return;
-  }
+  clearSupabaseLocalSession();
+  currentSession = null;
+  applyAuthState();
   closeModal();
   showFlash("Logged out.");
 }
